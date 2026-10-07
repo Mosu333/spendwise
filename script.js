@@ -1,70 +1,81 @@
-// SpendWise - JavaScript foundation
-// Collects budget info from the user, calculates the balance, and logs results.
+// SpendWise - JavaScript Foundation
+console.log("SpendWise script loaded successfully!");
 
-// ----- Application data (variables) -----
-const appName = "SpendWise";      // const: never changes
-let monthlyBudget = 0;            // number: total money available
-let totalExpenses = 0;            // number: total money spent
-let remainingBalance = 0;         // number: budget minus expenses
-let userName = "";                // string: the user's name
+// ---------- 1. Store application data (variables) ----------
+let userName = "";          // string
+let monthlyBudget = 0;      // number
+let totalExpenses = 0;      // number
+let remainingBalance = 0;   // number
+let expenseCount = 0;       // number
+const currency = "$";       // constant string
 
-// ----- Functions -----
+// ---------- 2. Reusable functions ----------
 
-// Asks the user for a number and keeps asking until it is valid.
-function askForNumber(message) {
+// Asks for a number and keeps asking until it is valid
+function getNumberInput(message) {
   let value = NaN;
   while (isNaN(value) || value < 0) {
-    const answer = prompt(message);
-    if (answer === null) {
-      return 0; // user pressed Cancel
-    }
-    value = Number(answer);
-    if (answer.trim() === "" || isNaN(value) || value < 0) {
-      alert("Please enter a valid positive number.");
-      value = NaN;
-    }
+    const input = prompt(message);
+    if (input === null) return 0; // user pressed Cancel
+    value = parseFloat(input);
   }
   return value;
 }
 
-// Budget calculation: returns what is left after spending.
-function calculateBalance(budget, expenses) {
+// Adds a list of expenses together
+function calculateTotalExpenses(expenses) {
+  let total = 0;
+  for (let i = 0; i < expenses.length; i++) {
+    total += expenses[i];
+  }
+  return total;
+}
+
+// Budget minus expenses
+function calculateRemainingBalance(budget, expenses) {
   return budget - expenses;
 }
 
-// Returns the percentage of the budget that has been spent.
+// Percentage of the budget that has been spent
 function calculatePercentSpent(budget, expenses) {
-  if (budget === 0) {
-    return 0;
-  }
+  if (budget === 0) return 0;
   return (expenses / budget) * 100;
 }
 
-// Shows clearly labeled results in the browser console.
-function displayResults(name, budget, expenses, balance, percentSpent) {
-  console.log("===== " + appName + " Budget Summary =====");
-  console.log("User: " + name);
-  console.log("Monthly Budget: " + budget);
-  console.log("Total Expenses: " + expenses);
-  console.log("Remaining Balance: " + balance);
-  console.log("Percentage Spent: " + percentSpent.toFixed(1) + "%");
-  if (balance < 0) {
-    console.log("Warning: You have overspent your budget!");
+// Prints clearly labelled results to the console
+function displayResults() {
+  console.log("===== SpendWise Budget Summary =====");
+  console.log("User: " + userName);
+  console.log("Monthly Budget: " + currency + monthlyBudget.toFixed(2));
+  console.log("Number of Expenses: " + expenseCount);
+  console.log("Total Expenses: " + currency + totalExpenses.toFixed(2));
+  console.log("Remaining Balance: " + currency + remainingBalance.toFixed(2));
+  console.log("Percent of Budget Spent: " + calculatePercentSpent(monthlyBudget, totalExpenses).toFixed(1) + "%");
+
+  if (remainingBalance < 0) {
+    console.log("Warning: You have gone over budget!");
+  } else {
+    console.log("Great job! You are within your budget.");
   }
 }
 
-// Runs the whole app: collect input -> calculate -> display.
+// ---------- 3. Collect user input ----------
 function runSpendWise() {
-  userName = prompt("Welcome to " + appName + "! What is your name?") || "Guest";
-  monthlyBudget = askForNumber("Enter your monthly budget:");
-  totalExpenses = askForNumber("Enter your total expenses so far:");
+  userName = prompt("Welcome to SpendWise! What is your name?") || "Guest";
+  monthlyBudget = getNumberInput("Enter your monthly budget:");
+  expenseCount = getNumberInput("How many expenses do you want to enter?");
 
-  remainingBalance = calculateBalance(monthlyBudget, totalExpenses);
-  const percentSpent = calculatePercentSpent(monthlyBudget, totalExpenses);
+  const expenses = [];
+  for (let i = 1; i <= expenseCount; i++) {
+    expenses.push(getNumberInput("Enter amount for expense " + i + ":"));
+  }
 
-  displayResults(userName, monthlyBudget, totalExpenses, remainingBalance, percentSpent);
+  // ---------- 4. Calculations ----------
+  totalExpenses = calculateTotalExpenses(expenses);
+  remainingBalance = calculateRemainingBalance(monthlyBudget, totalExpenses);
+
+  // ---------- 5. Display results ----------
+  displayResults();
 }
 
-// ----- Start the app when the button is clicked -----
-document.getElementById("startBtn").addEventListener("click", runSpendWise);
-console.log(appName + " script loaded successfully.");
+runSpendWise();
